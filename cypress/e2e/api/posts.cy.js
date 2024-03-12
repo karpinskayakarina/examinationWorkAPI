@@ -213,41 +213,19 @@ describe("Create, Update, and Delete post entity", () => {
 });
 
 describe("Register a new user", () => {
-  it("should register a new user and return JWT access token", () => {
-    const userData = {
+  let user;
+
+  before(() => {
+    user = {
       email: faker.internet.email(),
       password: faker.internet.password(),
       firstname: faker.name.firstName(),
       lastname: faker.name.lastName(),
       age: faker.random.number({ min: 18, max: 100 }),
     };
-
-    cy.request({
-      method: "POST",
-      url: "/register",
-      body: userData,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }).then((response) => {
-      expect(response.status).to.equal(201);
-      expect(response.body).to.have.property("accessToken");
-      expect(response.body.user).to.have.property("id");
-      expect(response.body.user.email).to.equal(userData.email);
-      expect(response.body.user.firstname).to.equal(userData.firstname);
-      expect(response.body.user.lastname).to.equal(userData.lastname);
-      expect(response.body.user.age).to.equal(userData.age);
-    });
   });
-});
 
-describe("Login as an existing user", () => {
-  it("should log in an existing user and return JWT access token", () => {
-    const user = {
-      email: faker.internet.email(),
-      password: faker.internet.password(),
-    };
-
+  it("should register a new user and return JWT access token", () => {
     cy.request({
       method: "POST",
       url: "/register",
@@ -255,23 +233,33 @@ describe("Login as an existing user", () => {
       headers: {
         "Content-Type": "application/json",
       },
-    }).then(() => {
-      cy.request({
-        method: "POST",
-        url: "/login",
-        body: {
-          email: user.email,
-          password: user.password,
-        },
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }).then((response) => {
-        expect(response.status).to.equal(200);
-        expect(response.body).to.have.property("accessToken");
-        expect(response.body.user).to.have.property("id");
-        expect(response.body.user.email).to.equal(user.email);
-      });
+    }).then((response) => {
+      expect(response.status).to.equal(201);
+      expect(response.body).to.have.property("accessToken");
+      expect(response.body.user).to.have.property("id");
+      expect(response.body.user.email).to.equal(user.email);
+      expect(response.body.user.firstname).to.equal(user.firstname);
+      expect(response.body.user.lastname).to.equal(user.lastname);
+      expect(response.body.user.age).to.equal(user.age);
+    });
+  });
+
+  it("should log in the registered user and return JWT access token", () => {
+    cy.request({
+      method: "POST",
+      url: "/login",
+      body: {
+        email: user.email,
+        password: user.password,
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }).then((response) => {
+      expect(response.status).to.equal(200);
+      expect(response.body).to.have.property("accessToken");
+      expect(response.body.user).to.have.property("id");
+      expect(response.body.user.email).to.equal(user.email);
     });
   });
 });
