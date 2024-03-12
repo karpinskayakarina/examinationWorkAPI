@@ -1,3 +1,5 @@
+import faker from "faker";
+
 describe("Get all posts", () => {
   it("should return all posts and verify status code and content type", () => {
     cy.request("/posts").then((response) => {
@@ -206,6 +208,70 @@ describe("Create, Update, and Delete post entity", () => {
       failOnStatusCode: false,
     }).then((response) => {
       expect(response.status).to.equal(200);
+    });
+  });
+});
+
+describe("Register a new user", () => {
+  it("should register a new user and return JWT access token", () => {
+    const userData = {
+      email: faker.internet.email(),
+      password: faker.internet.password(),
+      firstname: faker.name.firstName(),
+      lastname: faker.name.lastName(),
+      age: faker.random.number({ min: 18, max: 100 }),
+    };
+
+    cy.request({
+      method: "POST",
+      url: "/register",
+      body: userData,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }).then((response) => {
+      expect(response.status).to.equal(201);
+      expect(response.body).to.have.property("accessToken");
+      expect(response.body.user).to.have.property("id");
+      expect(response.body.user.email).to.equal(userData.email);
+      expect(response.body.user.firstname).to.equal(userData.firstname);
+      expect(response.body.user.lastname).to.equal(userData.lastname);
+      expect(response.body.user.age).to.equal(userData.age);
+    });
+  });
+});
+
+describe("Login as an existing user", () => {
+  it("should log in an existing user and return JWT access token", () => {
+    const user = {
+      email: faker.internet.email(),
+      password: faker.internet.password(),
+    };
+
+    cy.request({
+      method: "POST",
+      url: "/register",
+      body: user,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }).then(() => {
+      cy.request({
+        method: "POST",
+        url: "/login",
+        body: {
+          email: user.email,
+          password: user.password,
+        },
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then((response) => {
+        expect(response.status).to.equal(200);
+        expect(response.body).to.have.property("accessToken");
+        expect(response.body.user).to.have.property("id");
+        expect(response.body.user.email).to.equal(user.email);
+      });
     });
   });
 });

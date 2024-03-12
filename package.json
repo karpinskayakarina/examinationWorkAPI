@@ -8,5 +8,8 @@
     "server": "npx json-server-auth http://jsonplaceholder.typicode.com/db"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "faker": "^6.6.6"
+  }
 }
